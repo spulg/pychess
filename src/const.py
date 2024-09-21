@@ -1,3 +1,5 @@
+import os
+
 WIDTH = 800
 HEIGHT = WIDTH
 
@@ -30,3 +32,16 @@ names = {
 }
 
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+TEXTURE_PATHS = dict()
+
+
+def init_textures():
+    for color in [WHITE, BLACK]:
+        for piece_type in range(KING, QUEEN + 1):
+            piece = color | piece_type
+            TEXTURE_PATHS[piece] = os.path.join(
+                f"../assets/images/imgs-{80}px/{names[color]}_{names[piece_type]}.png")
+
+
+init_textures()

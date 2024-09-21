@@ -8,10 +8,18 @@ class Main:
 
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
+
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("Chess")
+        self.board_surface = Game.create_surface()
         self.game = Game()
-        self.clock = pygame.time.Clock()  # Add a clock to control FPS
+        self.clock = pygame.time.Clock()
+
+    def get_mouse_square(self):
+        mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+        mouse_row = int(mouse_pos[0] / SQSIZE)
+        mouse_col = int(mouse_pos[1] / SQSIZE)
+        return mouse_col, mouse_row
 
     def mainloop(self):
         screen = self.screen
@@ -20,50 +28,40 @@ class Main:
         dragger = self.game.dragger
 
         while True:
-            self.clock.tick(60)  # Limit the frame rate to 60 FPS
+            mouse_col, mouse_row = self.get_mouse_square()
 
-            game.show_bg(screen)
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    return
+                elif event.type == pygame.MOUSEMOTION:
+                    pass
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if dragger.dragging:
+                        if (mouse_col, mouse_row) in board.valid_moves:
+                            captured = board.move_piece(dragger.initial_col, dragger.initial_row, mouse_col, mouse_row)
+                            game.play_sound(captured)
+                            dragger.undrag_piece()
+                    else:
+                        mouse_col, mouse_row = self.get_mouse_square()
+                        piece = board.squares[mouse_col][mouse_row]
+                        if piece != NONE:
+                            dragger.save_initial((mouse_col, mouse_row))
+                            dragger.drag_piece(piece)
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    pass
+                else:
+                    pass
+
+            screen.blit(self.board_surface, (0, 0))
             game.show_pieces(screen)
+            game.show_selector(screen, mouse_row, mouse_col)
 
             if dragger.dragging:
-                dragger.update_blit(screen)
+                game.show_valid_moves(screen, dragger.piece, dragger.initial_col, dragger.initial_row)
 
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    dragger.update_mouse(event.pos)
-
-                    clicked_row = dragger.mouseY // SQSIZE
-                    clicked_col = dragger.mouseX // SQSIZE
-                    piece = board.squares[clicked_row][clicked_col]
-                    if piece != NONE:
-                        dragger.save_initial(event.pos)
-                        dragger.drag_piece(piece)
-
-                elif event.type == pygame.MOUSEMOTION:
-                    if dragger.dragging:
-                        dragger.update_mouse(event.pos)
-                        # Only update the blit of the dragging piece
-                        game.show_bg(screen)
-                        game.show_pieces(screen)
-                        dragger.update_blit(screen)
-
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if dragger.dragging:
-                        dragger.update_mouse(event.pos)
-                        released_row = dragger.mouseY // SQSIZE
-                        released_col = dragger.mouseX // SQSIZE
-
-                        # Update board state
-                        board.squares[dragger.initial_row][dragger.initial_col] = NONE
-                        board.squares[released_row][released_col] = dragger.piece
-
-                        dragger.undrag_piece()
-
-                elif event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            pygame.display.update()
+            pygame.display.flip()
+            self.clock.tick(60)
 
 
 if __name__ == '__main__':

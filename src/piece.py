@@ -1,7 +1,6 @@
 from const import *
 import os
 
-
 class Piece:
     @staticmethod
     def get_color(piece: int) -> int:
