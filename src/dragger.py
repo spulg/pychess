@@ -1,19 +1,18 @@
 import pygame
 from const import *
-from piece import Piece
 
 
 class Dragger:
     def __init__(self):
+        self.img = None
         self.dragging = False
         self.piece = NONE
         self.initial_row = 0
         self.initial_col = 0
 
     def save_initial(self, pos):
-        print(pos)
-        self.initial_col = pos[0]
-        self.initial_row = pos[1]
+        self.initial_row = pos[0]
+        self.initial_col = pos[1]
 
     def drag_piece(self, piece):
         self.piece = piece

@@ -2,8 +2,8 @@ import pygame
 from const import *
 from board import Board
 from dragger import Dragger
-from piece import Piece
 from config import Config
+from src.piece import Piece
 
 
 class Game:
@@ -14,9 +14,9 @@ class Game:
         for row in range(ROWS):
             for col in range(COLS):
                 if (row + col) % 2 == 0:
-                    color = (234, 235, 200)  # light green
+                    color = (235, 209, 166)  # light brown
                 else:
-                    color = (119, 154, 88)  # dark green
+                    color = (165, 117, 80)  # dark brown
 
                 rect = pygame.Rect(row * SQSIZE, col * SQSIZE, SQSIZE, SQSIZE)
                 pygame.draw.rect(surface, color, rect)
@@ -30,7 +30,7 @@ class Game:
     def show_pieces(self, screen):
         for col in range(COLS):
             for row in range(COLS):
-                piece = self.board.squares[col][row]
+                piece = self.board[row, col]
                 if piece != NONE:
                     texture_path = TEXTURE_PATHS[piece]
                     img = pygame.image.load(texture_path)
@@ -38,14 +38,15 @@ class Game:
                     texture_rect = img.get_rect(center=img_center)
                     screen.blit(img, texture_rect)
 
-    def show_valid_moves(self, screen, piece, row, col):
-        self.board.compute_valid_moves(piece, row, col)
-        for move_col, move_row in self.board.valid_moves:
-            center_x = move_row * SQSIZE + SQSIZE // 2
-            center_y = move_col * SQSIZE + SQSIZE // 2
+    def show_valid_moves(self, screen, row, col):
+        valid_moves = Piece.compute_valid_moves(self.board, row, col)
+        for x, y in valid_moves:
+            center_x = x * SQSIZE + SQSIZE // 2
+            center_y = y * SQSIZE + SQSIZE // 2
             pygame.draw.circle(screen, (0, 0, 255), (center_x, center_y), SQSIZE // 5)
 
-    def show_selector(self, screen, row, col):
+    @staticmethod
+    def show_selector(screen, row, col):
         rect = (row * SQSIZE, col * SQSIZE, SQSIZE, SQSIZE)
         pygame.draw.rect(screen, (255, 0, 0, 50), rect, 2)
 

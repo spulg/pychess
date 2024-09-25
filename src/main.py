@@ -2,7 +2,7 @@ import pygame
 import sys
 from const import *
 from game import Game
-
+from piece import Piece
 
 class Main:
 
@@ -15,11 +15,12 @@ class Main:
         self.game = Game()
         self.clock = pygame.time.Clock()
 
-    def get_mouse_square(self):
+    @staticmethod
+    def get_mouse_square():
         mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
         mouse_row = int(mouse_pos[0] / SQSIZE)
         mouse_col = int(mouse_pos[1] / SQSIZE)
-        return mouse_col, mouse_row
+        return mouse_row, mouse_col
 
     def mainloop(self):
         screen = self.screen
@@ -28,7 +29,7 @@ class Main:
         dragger = self.game.dragger
 
         while True:
-            mouse_col, mouse_row = self.get_mouse_square()
+            mouse_row, mouse_col = self.get_mouse_square()
 
             events = pygame.event.get()
             for event in events:
@@ -38,16 +39,17 @@ class Main:
                     pass
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if dragger.dragging:
-                        if (mouse_col, mouse_row) in board.valid_moves:
-                            captured = board.move_piece(dragger.initial_col, dragger.initial_row, mouse_col, mouse_row)
+                        if (mouse_row, mouse_col) in Piece.compute_valid_moves(board, dragger.initial_row, dragger.initial_col):
+                            captured = board.move_piece(dragger.initial_row, dragger.initial_col, mouse_row, mouse_col)
                             game.play_sound(captured)
                             dragger.undrag_piece()
                     else:
-                        mouse_col, mouse_row = self.get_mouse_square()
-                        piece = board.squares[mouse_col][mouse_row]
+                        mouse_row, mouse_col = self.get_mouse_square()
+                        piece = board[mouse_row, mouse_col]
                         if piece != NONE:
-                            dragger.save_initial((mouse_col, mouse_row))
+                            dragger.save_initial((mouse_row, mouse_col))
                             dragger.drag_piece(piece)
+
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pass
                 else:
@@ -58,7 +60,7 @@ class Main:
             game.show_selector(screen, mouse_row, mouse_col)
 
             if dragger.dragging:
-                game.show_valid_moves(screen, dragger.piece, dragger.initial_col, dragger.initial_row)
+                game.show_valid_moves(screen, dragger.initial_row, dragger.initial_col)
 
             pygame.display.flip()
             self.clock.tick(60)

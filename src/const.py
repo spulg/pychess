@@ -33,6 +33,13 @@ names = {
 
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
+# castling availability
+WHITE_KINGSIDE = 'K'
+WHITE_QUEENSIDE = 'Q'
+BLACK_KINGSIDE = 'k'
+BLACK_QUEENSIDE = 'q'
+
+
 TEXTURE_PATHS = dict()
 
 
