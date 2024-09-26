@@ -48,10 +48,14 @@ class Game:
         rect = (row * SQSIZE, col * SQSIZE, SQSIZE, SQSIZE)
         pygame.draw.rect(screen, (255, 0, 0, 50), rect, 2)
 
-    def play_sound(self, captured=False):
+    def play_sound(self, sound_id: int):
         # https://github.com/AlejoG10/python-chess-ai-yt/blob/master/src/game.py
-        if captured:
+        if sound_id == CAPTURE:
             self.config.capture_sound.play()
-        else:
+        elif sound_id == MOVE:
             self.config.move_sound.play()
+        elif sound_id == WIN:
+            self.config.win_sound.play()
+        elif sound_id == ERROR:
+            self.config.error_sound.play()
 

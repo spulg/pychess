@@ -10,6 +10,7 @@ from theme import Theme
 class Config:
 
     def __init__(self):
+
         self.themes = []
         self._add_themes()
         self.idx = 0
@@ -19,6 +20,9 @@ class Config:
             os.path.join('assets/sounds/move.wav'))
         self.capture_sound = Sound(
             os.path.join('assets/sounds/capture.wav'))
+        self.win_sound = Sound(os.path.join('assets/sounds/tada.mp3'))
+        self.error_sound = Sound(os.path.join('assets/sounds/critical-stop.mp3'))
+
 
     def change_theme(self):
         self.idx += 1

@@ -41,9 +41,17 @@ class Main:
                 elif event.type == pygame.MOUSEMOTION:
                     pass
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if dragger.dragging and current_mouse_square in board.compute_valid_moves(dragger.initial_row, dragger.initial_col):
-                        captured = board.move_piece(dragger.initial_row, dragger.initial_col, current_mouse_square[0], current_mouse_square[1])
-                        game.play_sound(captured)
+                    if dragger.dragging:
+                        if current_mouse_square in board.compute_valid_moves(dragger.initial_row, dragger.initial_col):
+                            if board[current_mouse_square] == WHITE | KING or board[current_mouse_square] == BLACK | KING:
+                                game.play_sound(WIN)
+                            captured = board.move_piece(dragger.initial_row, dragger.initial_col, current_mouse_square[0], current_mouse_square[1])
+                            if captured:
+                                game.play_sound(CAPTURE)
+                            else:
+                                game.play_sound(MOVE)
+                        elif Piece.get_piece_color(board[current_mouse_square]) != Piece.get_piece_color(board[dragger.initial_row, dragger.initial_col]):
+                            game.play_sound(ERROR)
                         dragger.undrag_piece()
                     else:
                         piece = board[current_mouse_square]
@@ -51,7 +59,6 @@ class Main:
                             dragger.save_initial(current_mouse_square)
                             dragger.drag_piece(piece)
                             selected_square = current_mouse_square
-                            print(board.compute_valid_moves(*selected_square))
 
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pass

@@ -1,15 +1,18 @@
+from typing import Tuple
+
 import numpy as np
 from const import *
 from piece import Piece
 
+
 class Board:
-    def __init__(self, fen: str = STARTING_FEN):
+    def __init__(self, fen: str = STARTING_FEN_GIRAFFE):
         self.__squares = np.zeros((ROWS, COLS), dtype="uint8")
         self.playerToMove = None
         self.castling_availability = None
         self.en_passant_target_square = None
         self.halfmove_clock = None
-        self.fullmove_clock = None
+        self.fullmove_clock = 0
         self.fen_to_self(fen)
 
     def __getitem__(self, pos: (int, int)):
@@ -27,7 +30,8 @@ class Board:
             'n': KNIGHT,
             'b': BISHOP,
             'r': ROOK,
-            'q': QUEEN
+            'q': QUEEN,
+            'g' : GIRAFFE
         }
 
         _fen = fen.split(' ')
@@ -59,6 +63,7 @@ class Board:
     def move_piece(self, old_row: int, old_col: int, new_row: int, new_col: int) -> bool:
         piece = Piece.get_piece_type(self[old_row, old_col])
 
+        # en passant capture
         if piece == PAWN and (new_row, new_col) == self.en_passant_target_square:
             capture = True
             capture_col = new_col + 1 if Piece.get_piece_color(self[old_row, old_col]) == WHITE else new_col - 1
@@ -70,19 +75,27 @@ class Board:
         else:
             capture = False
 
-        # en passant capture
         if piece == PAWN and abs(new_col - old_col) == 2:
-            if Piece.get_piece_color(self[old_row, old_col]) == WHITE:
-                self.en_passant_target_square = (new_row, new_col + 1)
-            else:
-                self.en_passant_target_square = (new_row, new_col - 1)
+            dy = 1 if Piece.get_piece_color(self[old_row, old_col]) == WHITE else -1
+            self.en_passant_target_square = (new_row, new_col + dy)
         else:
             self.en_passant_target_square = None
 
         self[new_row, new_col] = self[old_row, old_col]
         self[old_row, old_col] = NONE
+        self.fullmove_clock += 1
 
         return capture
+
+
+    def get_king_square(self, color) -> Tuple[int, int]:
+        for row in ROWS:
+            for col in COLS:
+                square = self[row, col]
+                if square == color | KING:
+                    return row, col
+        return -1, -1
+
 
     def compute_valid_moves(self, row: int, col: int):
         """
@@ -157,6 +170,12 @@ class Board:
                               (row + 1, col + 2), (row + 1, col - 2), (row - 1, col + 2), (row - 1, col - 2)]
 
             valid_moves = [(x, y) for (x, y) in possible_moves if self.in_range(x, y) and empty_or_capture(x, y)]
+        elif piece == GIRAFFE:
+            possible_moves = [(row + 4, col + 1), (row + 4, col - 1), (row - 4, col + 1), (row - 4, col - 1),
+                              (row + 1, col + 4), (row + 1, col - 4), (row - 1, col + 4), (row - 1, col - 4)]
+
+            valid_moves = [(x, y) for (x, y) in possible_moves if self.in_range(x, y) and empty_or_capture(x, y)]
+
         elif piece == QUEEN:
             horizontal_vertical_sliding_piece()
             diagonal_sliding_piece()
@@ -169,6 +188,16 @@ class Board:
             pass
 
         return valid_moves
+
+    def is_check(self, color: int) -> bool:
+        king_square = self.get_king_square(color)
+        for row in ROWS:
+            for col in COLS:
+                square = self[row, col]
+                if square is not NONE and Piece.get_piece_color(square) != color:
+                    if king_square in self.compute_valid_moves(row, col):
+                        return True
+        return False
 
     @staticmethod
     def in_range(row, col):
