@@ -3,8 +3,6 @@ from const import *
 from board import Board
 from dragger import Dragger
 from config import Config
-from src.piece import Piece
-
 
 class Game:
     @staticmethod
@@ -39,7 +37,7 @@ class Game:
                     screen.blit(img, texture_rect)
 
     def show_valid_moves(self, screen, row, col):
-        valid_moves = Piece.compute_valid_moves(self.board, row, col)
+        valid_moves = self.board.compute_valid_moves(row, col)
         for x, y in valid_moves:
             center_x = x * SQSIZE + SQSIZE // 2
             center_y = y * SQSIZE + SQSIZE // 2

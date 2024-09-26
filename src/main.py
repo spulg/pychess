@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pygame
 import sys
 from const import *
@@ -28,8 +30,9 @@ class Main:
         board = self.game.board
         dragger = self.game.dragger
 
+        selected_square: Tuple[int, int] = (-1, -1)
         while True:
-            mouse_row, mouse_col = self.get_mouse_square()
+            current_mouse_square: Tuple[int, int] = self.get_mouse_square()
 
             events = pygame.event.get()
             for event in events:
@@ -38,17 +41,17 @@ class Main:
                 elif event.type == pygame.MOUSEMOTION:
                     pass
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if dragger.dragging:
-                        if (mouse_row, mouse_col) in Piece.compute_valid_moves(board, dragger.initial_row, dragger.initial_col):
-                            captured = board.move_piece(dragger.initial_row, dragger.initial_col, mouse_row, mouse_col)
-                            game.play_sound(captured)
-                            dragger.undrag_piece()
+                    if dragger.dragging and current_mouse_square in board.compute_valid_moves(dragger.initial_row, dragger.initial_col):
+                        captured = board.move_piece(dragger.initial_row, dragger.initial_col, current_mouse_square[0], current_mouse_square[1])
+                        game.play_sound(captured)
+                        dragger.undrag_piece()
                     else:
-                        mouse_row, mouse_col = self.get_mouse_square()
-                        piece = board[mouse_row, mouse_col]
+                        piece = board[current_mouse_square]
                         if piece != NONE:
-                            dragger.save_initial((mouse_row, mouse_col))
+                            dragger.save_initial(current_mouse_square)
                             dragger.drag_piece(piece)
+                            selected_square = current_mouse_square
+                            print(board.compute_valid_moves(*selected_square))
 
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pass
@@ -57,7 +60,7 @@ class Main:
 
             screen.blit(self.board_surface, (0, 0))
             game.show_pieces(screen)
-            game.show_selector(screen, mouse_row, mouse_col)
+            game.show_selector(screen, current_mouse_square[0], current_mouse_square[1])
 
             if dragger.dragging:
                 game.show_valid_moves(screen, dragger.initial_row, dragger.initial_col)

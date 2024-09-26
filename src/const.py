@@ -48,7 +48,7 @@ def init_textures():
         for piece_type in range(KING, QUEEN + 1):
             piece = color | piece_type
             TEXTURE_PATHS[piece] = os.path.join(
-                f"../assets/images/imgs-{80}px/{names[color]}_{names[piece_type]}.png")
+                f"assets/images/imgs-{80}px/{names[color]}_{names[piece_type]}.png")
 
 
 init_textures()
